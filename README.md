@@ -19,6 +19,8 @@ In Powershell
 
 1. `  pip install -r requirements.txt  `
 2. `  Copy-Item .env.example .env  `
+
+   Visit [https://console.groq.com/home](https://console.groq.com/home): to create your API Key. Copy it and store it carefully. In the .env file, paste the API key in place of "your_api_key_here".
 3. `  streamlit run streamlit_app.py  `
 
 This will open the web application in the local host. 
