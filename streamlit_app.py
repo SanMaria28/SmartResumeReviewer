@@ -19,7 +19,7 @@ api_key = os.getenv("GROQ_API_KEY")
 
 # Page configuration
 st.set_page_config(
-    page_title="🤖 Smart Resume Reviewer",
+    page_title="🤖 Nestor",
     page_icon="📝",
     layout="wide",
     initial_sidebar_state="expanded"
