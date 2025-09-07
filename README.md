@@ -1,30 +1,153 @@
-# Smart Resume Reviewer
-## How to create a virtual environment in VS Code
 
-Open the terminal in the VS Code and run these commands
+# 🤖 Smart Resume Reviewer
 
-In Powershell
+An **AI-powered resume analysis and optimization tool** that provides personalized, actionable feedback to help you tailor your resume for your target job role.  
 
-1. `  python -m venv myenv  `
-2. `  .\myenv\Scripts\Activate.ps1  `
+Supports PDF upload and text paste inputs, offers optional job description-based targeted analysis, and generates professional reports with clear scoring and strategic recommendations.
 
-In Linux
+---
 
-1. `  python -m venv myenv  `
-2. `  source myenv\bin\Activate  `
+## ✨ Features
 
-## How to run the python file
+- 📄 Upload your resume as a PDF or paste plain text.  
+- 🎯 Optional: Paste a specific job description for targeted analysis.  
+- 🤖 AI-powered semantic analysis for ATS compatibility and skill alignment.  
+- ⭐ Professional scoring on:
+  - Technical Skills  
+  - Experience  
+  - Achievements  
+  - Education  
+  - ATS Optimization  
+  - Presentation  
+- 📊 Visual star ratings and progress bars for clarity.  
+- 🛠️ Actionable **priority improvement plans** to boost your resume.  
+- 📥 Export detailed AI-generated reports.  
+- ⚠️ Transparent **AI usage disclaimer** for user awareness.  
 
-In Powershell
+---
 
-1. `  pip install -r requirements.txt  `
-2. `  Copy-Item .env.example .env  `
+## 🚀 Getting Started
 
-   Visit [https://console.groq.com/home](https://console.groq.com/home): to create your API Key. Copy it and store it carefully. In the .env file, paste the API key in place of "your_api_key_here".
-3. `  streamlit run streamlit_app.py  `
+### ✅ Prerequisites
 
-This will open the web application in the local host. 
+- Python 3.8+  
+- Git installed  
+- A free API key from [Groq Console](https://console.groq.com/)  
 
-We have used Streamlit Cloud to deploy the app. The GROQ API KEY is added in the Secrets or Environment Variables.
+---
 
-Check Out the APP here: [Smart Resume Reviewer](https://smartresumereviewer-5crsutzysp2jzvyanvkd7h.streamlit.app/)
+### ⚙️ Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/yourusername/smart-resume-reviewer.git
+   cd smart-resume-reviewer
+
+2. **Create and activate a virtual environment:**
+
+   #### macOS/Linux
+
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+
+   #### Windows (PowerShell)
+
+   ```powershell
+   python -m venv venv
+   .\venv\Scripts\Activate.ps1
+   ```
+
+   #### Windows (CMD)
+
+   ```cmd
+   python -m venv venv
+   .\venv\Scripts\activate.bat
+   ```
+
+3. **Install dependencies:**
+
+   ```bash
+   pip install --upgrade pip
+   pip install -r requirements.txt
+   ```
+
+4. **Configure environment variables:**
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   Open `.env` and add your API key:
+
+   ```bash
+   GROQ_API_KEY=your_actual_groq_api_key_here
+   ```
+   OR:
+   ```bash
+   echo "GROQ_API_KEY=your_actual_groq_api_key_here" > .env
+   ```
+
+---
+
+## ▶️ Running the Application
+
+Start the app with:
+
+```bash
+streamlit run streamlit_app.py
+```
+
+Then open [http://localhost:8501](http://localhost:8501) in your browser.
+
+---
+
+## 📝 Usage
+
+1. Select your **target job role**.
+2. Upload a **PDF resume** or paste your resume text.
+3. (Optional) Paste a **job description** for more personalized analysis.
+4. Click **Generate AI-Powered Resume Analysis**.
+5. Review your **personalized report** with scores and actionable insights.
+6. Download the **detailed report** if desired.
+
+---
+
+## 📊 Understanding the Report
+
+* **ATS Compatibility** → Semantic similarity between resume & job description.
+* **Technical Skills** → Alignment of skills with role requirements.
+* **Experience** → Work history relevance.
+* **Achievements** → Quantified impacts and results.
+* **Education** → Relevance of academic background.
+* **Presentation** → Formatting, clarity, and layout quality.
+
+---
+
+## 👥 Contributors
+
+This project was collaboratively developed by:
+
+* [San Maria Joby](https://github.com/SanMaria28)
+* [Joel Jacob Roji](https://github.com/JoelJacobRoji)
+* [Darain Brit A](https://github.com/Darain-Brit-A)
+* [Darren Samuel D'cruz](https://github.com/Darren-Dcruz)
+  
+---
+
+## ☁️ Deployment Options
+
+* Deploy on:
+
+  * [Streamlit Community Cloud](https://smartresumereviewer-5crsutzysp2jzvyanvkd7h.streamlit.app/)
+
+## 📜 License
+
+This project is licensed under the **MIT License**.
+See the [LICENSE](LICENSE) file for details.
+
+---
+
+**💡 Made with 🤖 AI technology to empower your career growth!**
+
