@@ -84,7 +84,7 @@ Supports PDF upload and text paste inputs, offers optional job description-based
    ```bash
    GROQ_API_KEY=your_actual_groq_api_key_here
    ```
-   OR:
+   Or in terminal:
    ```bash
    echo "GROQ_API_KEY=your_actual_groq_api_key_here" > .env
    ```
