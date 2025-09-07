@@ -167,7 +167,7 @@ JOB_ROLES = {
 # Title and Header
 st.markdown("""
 <div class="main-header">
-    <h1>🤖 Smart Resume Reviewer</h1>
+    <h1>🤖 Nestor</h1>
     <h3>AI-Powered Resume Analysis & Comprehensive Upgrade Recommendations</h3>
     <p>Get detailed, personalized feedback to optimize your resume for any job role</p>
 </div>
