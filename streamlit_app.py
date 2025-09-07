@@ -1,5 +1,5 @@
 # Smart Resume Reviewer - Complete AI-Powered Resume Analysis Tool
-# Concise version - Shorter, focused creative reports
+# Clean version - Removed boxes and metrics display
 
 import streamlit as st
 from pdfminer.high_level import extract_text
@@ -25,7 +25,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for enhanced UI - REMOVED WHITE BARS
+# Custom CSS for enhanced UI - REMOVED WHITE BARS AND BOXES
 st.markdown("""
 <style>
     .main-header {
@@ -52,6 +52,15 @@ st.markdown("""
         margin: 1.5rem 0;
         box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
+    .disclaimer-section {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        border-left: 4px solid #6c757d;
+        margin: 2rem 0;
+        font-size: 0.9em;
+        color: #6c757d;
+    }
     .score-high { color: #28a745; font-weight: bold; }
     .score-medium { color: #ffc107; font-weight: bold; }
     .score-low { color: #dc3545; font-weight: bold; }
@@ -74,7 +83,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Session States
-session_vars = ['form_submitted', 'resume', 'resume_filename', 'selected_job_role', 'analysis_results']
+session_vars = ['form_submitted', 'resume', 'resume_filename', 'selected_job_role', 'custom_job_desc', 'analysis_results']
 for var in session_vars:
     if var not in st.session_state:
         st.session_state[var] = "" if var != 'form_submitted' else False
@@ -208,7 +217,7 @@ def calculate_similarity_bert(text1, text2):
         st.error(f"Error calculating similarity: {str(e)}")
         return 0.0
 
-def generate_comprehensive_report(resume, job_role):
+def generate_comprehensive_report(resume, job_role, custom_job_desc=""):
     """Generate CONCISE, CREATIVE analysis report using Groq LLM"""
     try:
         if not api_key:
@@ -226,12 +235,19 @@ def generate_comprehensive_report(resume, job_role):
 **Focus Areas**: {', '.join(role_info.get('experience_focus', [])[:4])}
 """
 
-        # Generate a standard job description for the role
-        if job_role in JOB_ROLES and job_role != "Custom Role":
+        # Determine which job description to use
+        if custom_job_desc.strip():
+            # Use custom job description if provided
+            job_desc = custom_job_desc.strip()
+            job_source = "custom job description provided by user"
+        elif job_role in JOB_ROLES and job_role != "Custom Role":
+            # Use standard job description
             role_info = JOB_ROLES[job_role]
             job_desc = f"""We are seeking a skilled {job_role} with 3+ years experience in: {', '.join(role_info['key_skills'][:8])}. Strong proficiency in: {', '.join(role_info.get('experience_focus', [])[:5])}."""
+            job_source = f"standard {job_role} requirements"
         else:
             job_desc = "General professional role requiring relevant experience and skills."
+            job_source = "general professional requirements"
 
         prompt = f"""
 You are an expert AI Career Consultant. Create a CONCISE, PROFESSIONAL resume analysis report with creative visual elements. Keep it focused and actionable - maximum 800 words total.
@@ -353,7 +369,7 @@ IMPORTANT:
             messages=[{"role": "user", "content": prompt}],
             model="llama-3.3-70b-versatile",
             temperature=0.3,
-            max_tokens=1200  # Reduced from 4000 to keep reports shorter
+            max_tokens=1200
         )
         
         return chat_completion.choices[0].message.content
@@ -430,7 +446,8 @@ with st.sidebar:
     ### 🚀 Quick Start:
     1. **Select job role** from dropdown
     2. **Upload PDF OR paste text** (either method works)
-    3. **Click Analyze** for focused report
+    3. **Add specific job description** (optional)
+    4. **Click Analyze** for focused report
     
     ### 📊 What You'll Get:
     - **Concise professional report** (under 800 words)
@@ -470,7 +487,7 @@ if not st.session_state.form_submitted:
         
         st.markdown("---")
         
-        # Resume Input Section - CLEANED UP WITHOUT WHITE BARS
+        # Resume Input Section
         st.markdown("## 📄 Resume Input Options")
         st.info("💡 **Choose either method to provide your resume - both work independently:**")
         
@@ -479,7 +496,7 @@ if not st.session_state.form_submitted:
         pasted_text = ""
         resume_filename = ""
         
-        # PDF Upload Section - CLEAN VERSION
+        # PDF Upload Section
         st.markdown("### 📁 Option 1: Upload PDF Resume")
         
         uploaded_file = st.file_uploader(
@@ -520,11 +537,11 @@ if not st.session_state.form_submitted:
                     )
             else:
                 st.error(pdf_text)
-                pdf_text = ""  # Reset if extraction failed
+                pdf_text = ""
         
         st.markdown("---")
         
-        # Text Paste Section - CLEAN VERSION
+        # Text Paste Section
         st.markdown("### 📝 Option 2: Paste Resume Text")
         
         pasted_text = st.text_area(
@@ -619,41 +636,88 @@ SKILLS
                     else:
                         st.warning(f"⚠️ Consider adding missing sections ({quality_score}/6 criteria met)")
             
-            if not resume_filename:  # Only set filename if no PDF was uploaded
+            if not resume_filename:
                 resume_filename = f"pasted_resume_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
         
-        # Determine final resume content - BOTH METHODS SUPPORTED
+        # Determine final resume content
         final_resume_text = ""
         input_source = ""
         
         if pdf_text and pasted_text:
-            # Both inputs provided - let user choose or use PDF as priority
             st.warning("⚠️ **Both PDF and text provided. Using PDF content for analysis.** If you prefer to use pasted text, clear the PDF upload above.")
             final_resume_text = pdf_text
             input_source = "PDF Upload"
         elif pdf_text:
-            # Only PDF provided
             final_resume_text = pdf_text
             input_source = "PDF Upload"
         elif pasted_text:
-            # Only text provided
             final_resume_text = pasted_text
             input_source = "Text Paste"
         else:
-            # No input provided
             final_resume_text = ""
             input_source = "None"
         
         st.markdown("---")
         
+        # OPTIONAL JOB DESCRIPTION SECTION - CLEANED UP
+        st.markdown("### 🎯 Optional: Specific Job Description")
+        
+        st.info("💡 **Optional Enhancement**: Paste a specific job description for more targeted analysis. If left blank, we'll use standard requirements for your selected role.")
+        
+        custom_job_description = st.text_area(
+            "Paste the specific job description you're applying for (optional):",
+            placeholder="""📋 Paste the actual job posting here for more precise analysis...
+
+Example:
+=====================================
+Senior Data Scientist - TechCorp Inc.
+San Francisco, CA | Remote Options Available
+
+About the Role:
+We're seeking a Senior Data Scientist to join our growing AI team. You'll work on cutting-edge machine learning projects that directly impact millions of users worldwide.
+
+Key Responsibilities:
+• Develop and deploy machine learning models for recommendation systems
+• Collaborate with product teams to identify data science opportunities
+• Build scalable data pipelines handling 100M+ daily events
+• Lead A/B testing initiatives to optimize user experience
+• Mentor junior data scientists and promote best practices
+
+Requirements:
+• Master's/PhD in Computer Science, Statistics, or related field
+• 5+ years experience in machine learning and data science
+• Expert-level Python programming and ML libraries (scikit-learn, TensorFlow, PyTorch)
+• Experience with big data technologies (Spark, Hadoop, AWS)
+• Strong communication skills and experience working with cross-functional teams
+• Previous experience with recommendation systems preferred
+
+What We Offer:
+• Competitive salary: $150,000 - $200,000 + equity
+• Comprehensive benefits and 4 weeks PTO
+• Remote work flexibility
+• $5,000 annual learning budget
+=====================================
+
+Benefits of adding specific job description:
+• More accurate keyword matching
+• Targeted skill gap analysis  
+• Company-specific recommendations
+• Higher ATS compatibility score""",
+            height=300,
+            help="Adding a specific job description will make the analysis more targeted and accurate for your application.",
+            key="custom_job_desc_input"
+        )
+        
+        st.markdown("---")
+        
         # Form submission section
-        st.markdown("## 🚀 Generate Focused Analysis Report")
+        st.markdown("## 🚀 Generate Analysis Report")
         
         col1, col2 = st.columns([3, 1])
         
         with col1:
             submitted = st.form_submit_button(
-                "🎯 Generate Concise Resume Analysis", 
+                "🎯 Generate AI-Powered Resume Analysis", 
                 type="primary",
                 use_container_width=True
             )
@@ -668,8 +732,28 @@ SKILLS
         if final_resume_text:
             word_count = len(final_resume_text.split())
             st.success(f"✅ Resume content ready from **{input_source}** ({word_count} words)")
+            if custom_job_description:
+                st.info("✅ Custom job description provided - Analysis will be more targeted!")
         else:
             st.warning("⚠️ Please provide resume content using either PDF upload OR text paste")
+        
+        # AI DISCLAIMER SECTION
+        st.markdown("---")
+        st.markdown('<div class="disclaimer-section">', unsafe_allow_html=True)
+        st.markdown("""
+        **🤖 AI-Powered Analysis Disclaimer**
+        
+        This application uses artificial intelligence (AI) technology to analyze your resume and provide career recommendations. Please note:
+        
+        • **AI Analysis**: All resume evaluations and recommendations are generated using advanced AI language models
+        • **Data Privacy**: Your resume content is processed securely and is not stored permanently on our servers
+        • **Recommendations**: AI-generated suggestions should be considered as guidance - use your professional judgment for implementation
+        • **Accuracy**: While our AI strives for accuracy, please verify all recommendations before applying to your resume
+        • **Human Review**: Consider having your updated resume reviewed by human career professionals for additional perspective
+        
+        By using this service, you acknowledge that the analysis is AI-generated and should be used as a supplementary career development tool.
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
         
         if clear_form:
             for key in session_vars:
@@ -685,6 +769,7 @@ SKILLS
                 st.session_state.resume = final_resume_text
                 st.session_state.resume_filename = resume_filename
                 st.session_state.selected_job_role = selected_role
+                st.session_state.custom_job_desc = custom_job_description
                 
                 validation_errors = validate_inputs(final_resume_text)
                 
@@ -703,33 +788,36 @@ if st.session_state.form_submitted:
     st.markdown("---")
     
     # Analysis header
-    st.markdown(f"## 📊 Focused Analysis Report for: **{st.session_state.selected_job_role}**")
+    st.markdown(f"## 📊 Analysis Report for: **{st.session_state.selected_job_role}**")
     
     # Progress tracking
     progress_bar = st.progress(0)
     status_text = st.empty()
     
-    # Step 1: Role-specific analysis preparation
-    status_text.text("🎯 Step 1/4: Analyzing role requirements...")
+    # Step 1: Analysis preparation
+    status_text.text("🎯 Step 1/4: Analyzing job requirements...")
     progress_bar.progress(25)
     
-    # Generate standard job requirements for similarity calculation
-    if st.session_state.selected_job_role in JOB_ROLES and st.session_state.selected_job_role != "Custom Role":
+    # Generate job description for similarity calculation
+    if st.session_state.custom_job_desc.strip():
+        comparison_job_desc = st.session_state.custom_job_desc.strip()
+    elif st.session_state.selected_job_role in JOB_ROLES and st.session_state.selected_job_role != "Custom Role":
         role_info = JOB_ROLES[st.session_state.selected_job_role]
-        standard_job_desc = f"{role_info['description']} Key skills: {', '.join(role_info['key_skills'])} Experience areas: {', '.join(role_info.get('experience_focus', []))}"
+        comparison_job_desc = f"{role_info['description']} Key skills: {', '.join(role_info['key_skills'])} Experience areas: {', '.join(role_info.get('experience_focus', []))}"
     else:
-        standard_job_desc = "Professional role requiring relevant experience and skills."
+        comparison_job_desc = "Professional role requiring relevant experience and skills."
     
-    ats_score = calculate_similarity_bert(st.session_state.resume, standard_job_desc)
+    ats_score = calculate_similarity_bert(st.session_state.resume, comparison_job_desc)
     ats_percentage = round(ats_score * 100, 1)
     
     # Step 2: AI Analysis
-    status_text.text("🤖 Step 2/4: Generating focused analysis...")
+    status_text.text("🤖 Step 2/4: Generating AI analysis...")
     progress_bar.progress(50)
     
     comprehensive_report = generate_comprehensive_report(
         st.session_state.resume, 
-        st.session_state.selected_job_role
+        st.session_state.selected_job_role,
+        st.session_state.custom_job_desc
     )
     
     # Step 3: Score Extraction
@@ -740,7 +828,7 @@ if st.session_state.form_submitted:
     overall_percentage = calculate_percentage_score(report_scores)
     
     # Step 4: Complete
-    status_text.text("✅ Concise analysis report ready!")
+    status_text.text("✅ Analysis complete!")
     progress_bar.progress(100)
     
     assessment_level, assessment_desc = get_assessment_level(ats_score, overall_percentage)
@@ -781,6 +869,12 @@ if st.session_state.form_submitted:
     # Overall Assessment
     st.info(f"**{assessment_level}**: {assessment_desc}")
     
+    # Show analysis type without metrics
+    if st.session_state.custom_job_desc.strip():
+        st.success("🎯 **Targeted Analysis**: Used your specific job description for precise recommendations")
+    else:
+        st.info(f"📊 **General Analysis**: Used standard {st.session_state.selected_job_role} requirements")
+    
     # Individual Scores Breakdown
     if report_scores:
         st.markdown("### 📊 Detailed Score Breakdown")
@@ -804,50 +898,49 @@ if st.session_state.form_submitted:
     st.markdown("---")
     
     # Comprehensive Report Display
-    st.markdown("### 📝 Focused Analysis Report")
-    st.markdown("*Concise, actionable recommendations for immediate impact.*")
+    st.markdown("### 📝 Analysis Report")
+    st.markdown("*Focused, actionable recommendations for immediate impact.*")
     
     if "Error" in comprehensive_report:
         st.error(comprehensive_report)
     else:
-        # Display the comprehensive report with enhanced formatting
         st.markdown(comprehensive_report)
     
     st.markdown("---")
     
     # Export Section
-    st.markdown("### 📥 Export Focused Report")
+    st.markdown("### 📥 Export Report")
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        # Complete report
+        analysis_type_text = "TARGETED" if st.session_state.custom_job_desc.strip() else "GENERAL"
         detailed_report = f"""
-🎯 FOCUSED RESUME ANALYSIS REPORT
+🎯 RESUME ANALYSIS REPORT
 ═══════════════════════════════════════════════════════════════════════════════
 
 📋 EXECUTIVE SUMMARY
 ═══════════════════════════════════════════════════════════════════════════════
 Target Role: {st.session_state.selected_job_role}
 Analysis Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-Report Type: Focused & Actionable
+Analysis Type: {analysis_type_text} - AI-Generated
 
 📊 PERFORMANCE SCORES
 ═══════════════════════════════════════════════════════════════════════════════
 • ATS Compatibility: {ats_percentage}%
 • Overall Performance: {overall_percentage}%
-• Assessment Level: {assessment_level}
+• Assessment: {assessment_level}
 • Growth Potential: +{100-overall_percentage}% improvement available
 
 🎯 INDIVIDUAL SCORES
 ═══════════════════════════════════════════════════════════════════════════════
 {chr(10).join([f'• {cat}: {score}/5 ({round((score/5)*100, 1)}%)' for cat, score in zip(['Technical Skills', 'Experience', 'Achievements', 'Education', 'ATS Optimization', 'Presentation'], report_scores)])}
 
-📋 FOCUSED ANALYSIS & RECOMMENDATIONS
+📋 DETAILED ANALYSIS & RECOMMENDATIONS
 ═══════════════════════════════════════════════════════════════════════════════
 {comprehensive_report}
 
-⚡ QUICK IMPLEMENTATION GUIDE
+⚡ IMPLEMENTATION GUIDE
 ═══════════════════════════════════════════════════════════════════════════════
 1. Complete Priority Actions within 48 hours
 2. Implement content optimizations in Week 1
@@ -862,15 +955,15 @@ Report Type: Focused & Actionable
 □ Response Time: <2 weeks average
 
 ═══════════════════════════════════════════════════════════════════════════════
-Generated by Smart Resume Reviewer AI - Focused Career Intelligence
-For continued optimization: Re-analyze your updated resume after improvements
+Generated by Smart Resume Reviewer AI - Career Intelligence Platform
+For optimization: Re-analyze your updated resume after improvements
 ═══════════════════════════════════════════════════════════════════════════════
 """
         
         st.download_button(
-            "📄 Download Focused Report",
+            "📄 Download Report",
             detailed_report,
-            file_name=f"focused_resume_analysis_{st.session_state.selected_job_role.lower().replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M')}.txt",
+            file_name=f"resume_analysis_{st.session_state.selected_job_role.lower().replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M')}.txt",
             mime="text/plain",
             use_container_width=True
         )
@@ -905,8 +998,8 @@ For continued optimization: Re-analyze your updated resume after improvements
 
 # Footer
 st.markdown("---")
-st.markdown("### 🚀 Smart Resume Reviewer - Focused Career Intelligence")
-st.markdown("**Get Concise, Actionable Resume Insights in Minutes**")
+st.markdown("### 🚀 Smart Resume Reviewer - AI-Powered Career Intelligence")
+st.markdown("**Get Concise, Actionable Resume Insights**")
 
 # Feature grid using columns
 col1, col2, col3, col4 = st.columns(4)
@@ -915,12 +1008,12 @@ with col1:
     st.markdown("""
     **📊 Focused Reports**
     
-    Concise analysis under 800 words
+    Concise analysis with actionable insights
     """)
 
 with col2:
     st.markdown("""
-    **🤖 AI-Powered Insights**
+    **🤖 AI-Powered**
     
     Smart analysis with visual elements
     """)
@@ -934,14 +1027,14 @@ with col3:
 
 with col4:
     st.markdown("""
-    **📈 Success Metrics**
+    **🎯 Optional Targeting**
     
-    Clear targets and timelines
+    Custom job description analysis
     """)
 
 st.markdown("---")
-st.markdown("*💡 Focused Strategy: Priority actions • Quick wins • Measurable results • Immediate impact*")
-st.markdown("**Ready for focused resume optimization? Generate your analysis above! 🎯**")
+st.markdown("*💡 AI-Powered Strategy: Smart insights • Quick wins • Measurable results • Immediate impact*")
+st.markdown("**Ready for AI-powered resume optimization? Generate your analysis above! 🎯**")
 
 # Error handling
 try:
