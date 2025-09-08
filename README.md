@@ -147,7 +147,7 @@ This project was collaboratively developed by:
   
   * [Google Drive Link](https://drive.google.com/drive/folders/19f86xZsWnPxChjbc1QsEmXIqj-lwGKT3?usp=sharing)
   * [Demo Video URL](https://docs.google.com/videos/d/1z7SanLyHeTatoa20yFn0_YCvYgGhdbFPK8cWyqs_f8A/edit?usp=sharing)
-  * [Presentation URL](https://drive.google.com/file/d/1DIKxgz2FT4mGvgqLT6Nv628j-XZ0ooo6/view?usp=sharing)
+  * [Presentation URL](https://drive.google.com/file/d/1C-e3V2KxWkVmRCkHVfGrigZT1E81zmPB/view?usp=sharing)
    
 ## 📜 License
 
