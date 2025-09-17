@@ -154,7 +154,5 @@ This project was collaboratively developed by:
 This project is licensed under the **MIT License**.
 See the [LICENSE](LICENSE) file for details.
 
----
 
-**💡 Made with 🤖 AI technology to empower your career growth!**
 
